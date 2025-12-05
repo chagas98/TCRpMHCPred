@@ -90,13 +90,14 @@ class SlurmColabFold:
 
         self.template = f"""
 #!/bin/bash
-#SBATCH --array=1-800%1
+#SBATCH --array=1-10%1
 #SBATCH --job-name={self.pipeline_name}_colabfold
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=short-gpu-small
 #SBATCH --mem-per-cpu=8G
-#SBATCH --gres=gpu:1g.5gb:1
+#SBATCH --time=0-00:30:00
+#SBATCH --gres=gpu:a100:1
 #SBATCH --output=05_logs/pMHC/slurm.{self.pipeline_name}.%A_%a.out
 #SBATCH --error=05_logs/pMHC/slurm.{self.pipeline_name}.%A_%a.error
 

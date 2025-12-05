@@ -83,6 +83,7 @@ class SlurmTCRModel2:
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=5G
+#SBATCH --time=0-00:30:00
 #SBATCH --partition=short-gpu-big
 #SBATCH --gres=gpu:a100:1
 #SBATCH --output=05_logs/TCR/slurm.{self.pipeline_name}.%A_%a.out
