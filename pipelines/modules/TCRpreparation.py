@@ -94,6 +94,8 @@ echo $SLURM_ARRAY_TASK_ID
 
 value=$((SLURM_ARRAY_TASK_ID))
 
+cd $SLURM_SUBMIT_DIR
+
 readarray -t table < <(tail -n +2 01_identification/unique_tcr_samples_{DATE_STRING}.csv | cut -d, -f1-4)
 
 # assuming $value starts at 1

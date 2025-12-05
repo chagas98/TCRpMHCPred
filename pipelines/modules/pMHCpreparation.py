@@ -102,6 +102,8 @@ class SlurmColabFold:
 
 echo "Job ID Array: $SLURM_ARRAY_JOB_ID"
 
+cd $SLURM_SUBMIT_DIR
+
 COLABFOLD_SIF={self.colabfold_path}
 FASTA_DIR=04_assets/pMHC_fastas
 
