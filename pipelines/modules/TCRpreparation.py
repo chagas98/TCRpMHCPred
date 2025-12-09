@@ -112,7 +112,7 @@ echo "TCRB Sequence: $TCRB"
 
 tcrmodel2_ub_tcr \
 --job_id=$sample_id \
---output_dir=02_predictions/TCR/TCR_raw \
+--output_dir=$(pwd)/02_predictions/TCR/TCR_raw \
 --tcra_seq=$TCRA \
 --tcrb_seq=$TCRB \
 --ori_db=/database/ \
