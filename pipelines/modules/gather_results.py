@@ -30,18 +30,20 @@ def find_tcr_models(input_df, path_to_tcr_models):
     tcr_models_df = pd.DataFrame(tcr_models)
     return tcr_models_df
 
-def gather_pmhc_models(input_df,path_to_pmhc_models):
+def gather_pmhc_models(path_to_pmhc_models, pattern_mhc = "*_relaxed_rank_001_alphafold2_multimer_v3_model_*"):
 
-    source_dir = Path("pMHC")
-    pattern = "*_relaxed_rank_001_alphafold2_multimer_v3_model_*"
+    source_dir = Path(path_to_pmhc_models)
+    pattern = pattern_mhc
 
     matching_files = [f for f in source_dir.rglob(pattern) if f.is_file()]
 
-def find_pmhc_models(input_df,path_to_pmhc_models):
+    return matching_files
+
+def find_pmhc_models(input_df,dir_path):
     pmhc_models = []
     for index, row in input_df.iterrows():
         unique_pmhc_id = row['unique_mhc_id']
-        model_name_pattern = os.path.join(path_to_pmhc_models, unique_pmhc_id + '*')
+        model_name_pattern = os.path.join(dir_path, unique_pmhc_id + '*')
         
         if not glob.glob(model_name_pattern):
             row['filepath_b'] = None

@@ -201,32 +201,24 @@ def extract_chain(input_pdb, output_pdb, chain_id):
     io.save(output_pdb, select=ChainSelector(chain_id))
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Batch-renumber PDB files for MHC-I using a single reference"
-    )
-    parser.add_argument("--ref_pdb", help="Reference PDB for numbering")
-    parser.add_argument("--input_dir", help="Directory with target PDB files")
-    parser.add_argument("--output_dir", help="Directory to save renumbered PDBs")
-    args = parser.parse_args()
-    os.makedirs(args.output_dir, exist_ok=True)
+def renumbering_pMHC(pmhc_paths, output_dir, ref_pdb):
 
-    for fname in os.listdir(args.input_dir):
+    for fname in pmhc_paths:
         if not fname.lower().endswith('.pdb'):
             continue
-        tgt_path = os.path.join(args.input_dir, fname)
+        tgt_path = fname
         base, ext = os.path.splitext(fname)
-        out_path = os.path.join(args.output_dir, f"{base}_renum{ext}")
+        out_path = os.path.join(output_dir, f"{base}_renum{ext}")
         try:
             parser_pdb = PDBParser(QUIET=True)
             struct = parser_pdb.get_structure('TGT', tgt_path)
-            tmp = os.path.join(args.output_dir, f'.tmp_{fname}')
+            tmp = os.path.join(output_dir, f'.tmp_{fname}')
             best_chain = None
             best_score = -1.0
             best_a1 = best_a2 = None
             for chain in struct[0]:
                 extract_chain(tgt_path, tmp, chain.id)
-                score, a1, a2 = run_tmalign_with_score(args.ref_pdb, tmp)
+                score, a1, a2 = run_tmalign_with_score(ref_pdb, tmp)
 
                 if score > best_score:
                     best_score, best_chain, best_a1, best_a2 = score, chain.id, a1, a2
@@ -238,7 +230,7 @@ def main():
             if best_chain is None:
                 raise RuntimeError('No suitable chain found for alignment')
             mapping = extract_residue_mapping_with_pdb_numbers(
-                args.ref_pdb, tgt_path, best_a1, best_a2
+                ref_pdb, tgt_path, best_a1, best_a2
             )
             mapping = {k:v for k,v in mapping.items() if k[0] == best_chain}
             # fill C-terminus
@@ -259,6 +251,3 @@ def main():
             print(f"Renumbered chain {best_chain} of {fname} -> {out_path}")
         except Exception as e:
             print(f"Failed to process {fname}: {e}")
-
-if __name__ == '__main__':
-    main()

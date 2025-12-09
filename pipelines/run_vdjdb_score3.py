@@ -15,16 +15,13 @@ cdate = datetime.now()
 DATE_STRING = f"{cdate.year}{cdate.month:02d}{cdate.day:02d}"
 
 class RunResources:
-    def __init__(self, name:str, pipeline_name:str, input_path:str, processed_path:str):
+    def __init__(self, name:str, pipeline_name:str, input_path:str):
         self.name = name
         self.pipeline_name = pipeline_name
         self.input_path = input_path
-        self.processed_path = processed_path
         self.set_resources()
 
     def set_resources(self):
-        # Define paths and create directories
-        self.data_path = self.processed_path
 
         # Create Run environment directories
         runs_dir     = f"../runs/{self.pipeline_name}"
@@ -41,26 +38,13 @@ class RunResources:
         os.makedirs(assets_path, exist_ok=True)
         os.makedirs(logs_path, exist_ok=True)
 
-        # Remove just10x references from VDJdb scored dataset
-        just10x_ref_path = "assets/immrep_just10x_exclusion.csv"
-
-        raw_df = pd.read_csv(self.input_path)
-        reference = pd.read_csv(just10x_ref_path)
-        just10x_df = reference[reference['Exclude'] == 1]
-
-        just10x_df['PMID'] = just10x_df['PMID'].replace({'PMID: ': ''})
-
-        filtered_df = raw_df[~raw_df['Reference'].isin(just10x_df['PMID'])]
-        filtered_df = filtered_df[~filtered_df['Reference'].isin(just10x_df['VDJdb_alias'])]
-        filtered_df.reset_index(drop=True, inplace=True)
-        filtered_df.to_csv(self.data_path, index=False)
-
+        input_df = pd.read_csv(self.input_path)
 
         # statistics
-        print(f"Original dataset size: {raw_df.shape[0]}")
-        print(f"Filtered dataset size: {filtered_df.shape[0]}")
+        print(f"Original dataset size: {input_df.shape[0]}")
 
         self.runs_dir = runs_dir
+        self.data_path = input_path
         self.id_path = id_path
         self.pred_path = pred_path
 
@@ -102,9 +86,9 @@ class GatherResults:
         #                 ref_pdb='04_assets/reference_1ao7.trunc.fit.pdb')
         
         data_all_df = find_pmhc_models(data_tcr_df, pMHC_renum_path)
-        
-        
-        data_all_df.to_csv(f'AF_{name}_{DATE_STRING}.csv', index=False)
+
+
+        data_all_df.to_csv(os.path.join(self.run_dir, '03_results', f'AF_{name}_{DATE_STRING}.csv'), index=False)
 
 
 if __name__ == "__main__":
@@ -115,18 +99,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     stage = args.stage
 
-    pipeline_name="vdjdb_score2_wojust10x"
-    name="score2_wojust10x"
-    input_path="../databases/VDJdb/02_processed/fullSeqs_dataset_score2_20251021.csv"
-    processed_path=f"../databases/VDJdb/02_processed/fullSeqs_dataset_{name}_{DATE_STRING}.csv"
+    pipeline_name="vdjdb_score_3"
+    name="score3"
+    input_path="../databases/VDJdb/02_processed/fullSeqs_dataset_score3_20251021.csv"
     date_to_gather = "20251022"
+
+    resources = RunResources(name=name,
+                             input_path=input_path,
+                             pipeline_name=pipeline_name)       
+
 
     if stage == "prep":
         print("Preparing data...")
-        resources = RunResources(name=name, 
-                                  pipeline_name=pipeline_name, 
-                                  input_path=input_path,
-                                  processed_path=processed_path)
 
         # Run TCRmodel2
         TCRpreparation(
