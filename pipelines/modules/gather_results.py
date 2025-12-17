@@ -19,7 +19,7 @@ def find_tcr_models(input_df, path_to_tcr_models):
         model_file_path = os.path.join(path_to_tcr_models, unique_tcr_id, 'ranked_0.pdb')
 
         if model_file_path.endswith('.pdb') and os.path.isfile(model_file_path):
-            row['filepath_a'] = model_file_path
+            row['filepath_a'] = os.path.abspath(model_file_path)
         else:
             row['filepath_a'] = None
         
@@ -42,14 +42,14 @@ def gather_pmhc_models(path_to_pmhc_models, pattern_mhc = "*_relaxed_rank_001_al
 def find_pmhc_models(input_df,dir_path):
     pmhc_models = []
     for index, row in input_df.iterrows():
-        unique_pmhc_id = row['unique_mhc_id']
-        model_name_pattern = os.path.join(dir_path, unique_pmhc_id + '*')
+        unique_pmhc_id = row['unique_pmhc_id']
+        model_name_pattern = os.path.join(dir_path, str(unique_pmhc_id) + '*')
         
         if not glob.glob(model_name_pattern):
             row['filepath_b'] = None
         else:
             model_file_path = glob.glob(model_name_pattern)[0]
-            row['filepath_b'] = model_file_path
+            row['filepath_b'] = os.path.abspath(model_file_path)
 
         row['label'] = 1
         row['source'] = 'colabfold_pmhc/tcrmodel2_tcr'

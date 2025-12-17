@@ -29,7 +29,7 @@ def _is_backbone_complete(residue, ignore_alts=False):
             continue
         if name in needed and atom.get_vector() is not None:
             have.add(name)
-    print(needed.issubset(have), have)
+
     return needed.issubset(have)
 
 def run_tmalign_with_score(ref_pdb, target_pdb):
@@ -86,6 +86,10 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
     print(f"Using chains: ref={rc}, tgt={tc}")
     ref_residues = [r for r in ref_struct[0][rc] if r.id[0] == ' ']
     tgt_residues = [r for r in tgt_struct[0][tc] if r.id[0] == ' ' and _is_backbone_complete(r)]
+
+    print(f"Reference chain {rc} has {len(ref_residues)} standard residues.")
+    print(f"Target chain {tc} has {len(tgt_residues)} standard residues.")
+    
     # build aligned index lists
     ref_iter = iter(ref_residues)
     tgt_iter = iter(tgt_residues)
@@ -94,6 +98,7 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
     for a1, a2 in zip(aln1, aln2):
         if a2 != '-':
             r = next(ref_iter)
+            print(r)
             ref_positions.append(r.id[1])
         else:
             ref_positions.append(None)
@@ -102,6 +107,8 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
             tgt_positions.append(t)
         else:
             tgt_positions.append(None)
+
+    print(f"Alignment length: {len(ref_positions)} residues.")
     non_none = [p for p in ref_positions if p is not None]
     if not non_none:
         return {}
@@ -110,6 +117,7 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
     mapping = {}
     insertion_counters = {}
     total = len(ref_positions)
+
     # assign mappings
     for idx, (ref_pos, tgt_r) in enumerate(zip(ref_positions, tgt_positions)):
         if tgt_r is None:
@@ -130,6 +138,7 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
                 letter = chr(ord('A') + cnt)
                 insertion_counters[base] = cnt + 1
                 mapping[(tc, tgt_r.id)] = (base, rc, letter)
+    print(f"Extracted {len(mapping)} residue mappings.")
     return mapping
 
 
@@ -138,7 +147,7 @@ def renumber_target_pdb(target_pdb, output_pdb, mapping):
     structure = parser.get_structure("tgt", target_pdb)
     chains_to_renum = set(cid for cid, _ in mapping.keys())
     print(f"Renumbering chains: {chains_to_renum}")
-    print(mapping)
+
     for model in structure:
         for chain in list(model):
             if chain.id not in chains_to_renum:
@@ -180,7 +189,7 @@ def renumber_target_pdb(target_pdb, output_pdb, mapping):
             if len(new_chain_ids) == 1:
                 chain.id = new_chain_ids.pop()
 
-
+    print(f"Renumbered PDB saved to: {output_pdb}")
     io = PDBIO()
     io.set_structure(structure)
     io.save(output_pdb)
@@ -203,10 +212,18 @@ def extract_chain(input_pdb, output_pdb, chain_id):
 
 def renumbering_pMHC(pmhc_paths, output_dir, ref_pdb):
 
-    for fname in pmhc_paths:
-        if not fname.lower().endswith('.pdb'):
-            continue
-        tgt_path = fname
+    os.makedirs(output_dir, exist_ok=True)
+
+    for tgt_path in pmhc_paths:
+
+        if not str(tgt_path).lower().endswith('.pdb'):
+            if os.path.exists(str(tgt_path)):
+                print(f"Skipping non-PDB file: {tgt_path}")
+                continue
+        else:
+            fname = os.path.basename(tgt_path)
+        
+        
         base, ext = os.path.splitext(fname)
         out_path = os.path.join(output_dir, f"{base}_renum{ext}")
         try:
@@ -222,11 +239,10 @@ def renumbering_pMHC(pmhc_paths, output_dir, ref_pdb):
 
                 if score > best_score:
                     best_score, best_chain, best_a1, best_a2 = score, chain.id, a1, a2
+
+            print(f"Best chain for {fname}: {best_chain} with TM-score {best_score:.4f}")
             os.remove(tmp)
-            print(tgt_path)
-            print(best_score)
-            print(best_a1)
-            print(best_a2)
+
             if best_chain is None:
                 raise RuntimeError('No suitable chain found for alignment')
             mapping = extract_residue_mapping_with_pdb_numbers(
@@ -250,4 +266,4 @@ def renumbering_pMHC(pmhc_paths, output_dir, ref_pdb):
             renumber_target_pdb(tgt_path, out_path, mapping)
             print(f"Renumbered chain {best_chain} of {fname} -> {out_path}")
         except Exception as e:
-            print(f"Failed to process {fname}: {e}")
+            raise RuntimeError(f"Failed to process {fname}: {e}")
