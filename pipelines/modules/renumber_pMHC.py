@@ -98,7 +98,6 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
     for a1, a2 in zip(aln1, aln2):
         if a2 != '-':
             r = next(ref_iter)
-            print(r)
             ref_positions.append(r.id[1])
         else:
             ref_positions.append(None)
@@ -150,6 +149,10 @@ def renumber_target_pdb(target_pdb, output_pdb, mapping):
 
     for model in structure:
         for chain in list(model):
+
+            if chain.id == "B":
+                chain.id = "C"
+        
             if chain.id not in chains_to_renum:
                 continue
             old_id = chain.id
@@ -253,6 +256,14 @@ def renumbering_pMHC(pmhc_paths, output_dir, ref_pdb):
             parser2 = PDBParser(QUIET=True)
             s2 = parser2.get_structure('TMP2', tgt_path)
             ch = s2[0][best_chain]
+
+            for chain in s2[0]:
+                if chain.id == "B":
+                    chain.id = "C"
+
+            for chain in s2[0]:
+                print(chain.id)
+
             all_res = [r for r in ch if r.id[0] == ' ' and _is_backbone_complete(r)]
             print(_is_backbone_complete(all_res[0]))
             existing = {num for num, cid, _ in mapping.values() if cid == best_chain}
