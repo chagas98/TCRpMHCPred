@@ -37,11 +37,13 @@ def run_tmalign_with_score(ref_pdb, target_pdb):
     Returns (score, aln1, aln2) from a single TM-align run.
     """
     result = subprocess.run(
-        ['TMalign', target_pdb, ref_pdb, '-a'],
+        ['TMalign', target_pdb, ref_pdb, '-a', 'T'],
         stdout=subprocess.PIPE, text=True
     )
     lines = result.stdout.splitlines()
     score = 0.0
+
+    print(result)
     for L in lines:
         if "TM-score=" in L and "Chain_2" in L:
             try:
