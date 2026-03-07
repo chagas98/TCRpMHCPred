@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 import pandas as pd
 from Bio.PDB import PDBParser, Polypeptide
 
-# DS_train = final dataset with all data
+"""Data verification script for TCR-pMHC datasets. Compares training and raw datasets for consistency in IDs, CDR3 sequences, peptides, MHC alleles, MHC sequences, and structural data."""
 
 
 @dataclass
