@@ -43,7 +43,7 @@ def find_pmhc_models(input_df,dir_path):
     pmhc_models = []
     for index, row in input_df.iterrows():
         unique_pmhc_id = row['unique_pmhc_id']
-        model_name_pattern = os.path.join(dir_path, str(unique_pmhc_id) + '*')
+        model_name_pattern = os.path.join(dir_path, str(unique_pmhc_id) + '_*')
         
         if not glob.glob(model_name_pattern):
             row['filepath_b'] = None

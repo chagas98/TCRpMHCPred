@@ -1,18 +1,12 @@
 import subprocess, sys, os
 from Bio.PDB import PDBParser, PDBIO
-from Bio.PDB.Polypeptide import three_to_one
+from Bio.PDB.Polypeptide import protein_letters_3to1
 import argparse
 from Bio.PDB.PDBIO import Select
 
 """
 Batch-renumber PDBs by selecting and renumbering the best-aligning chain for MHC-I (single reference).
 """
-import os
-import argparse
-import subprocess
-from Bio.PDB import PDBParser, PDBIO
-from Bio.PDB.PDBIO import Select
-from Bio.PDB.Polypeptide import three_to_one
 
 # ==== EXISTING FUNCTIONS: DO NOT MODIFY BELOW THIS LINE ====
 def _is_backbone_complete(residue, ignore_alts=False):
@@ -70,7 +64,7 @@ def extract_residue_mapping_with_pdb_numbers(ref_pdb, target_pdb, aln1, aln2):
         for r in chain:
             if r.id[0] != ' ': continue
             try:
-                seq += three_to_one(r.resname)
+                seq += protein_letters_3to1[r.resname]
             except:
                 seq += 'X'
         return seq
