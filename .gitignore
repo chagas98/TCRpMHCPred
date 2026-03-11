@@ -1,5 +1,7 @@
 # data
 /runs
+pipelines/tmp
+databases/VDJdb/00_vdjdb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

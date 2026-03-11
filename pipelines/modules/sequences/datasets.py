@@ -141,7 +141,9 @@ class VDJdbdataset():
         # Save to CSV
         df_out['TCR_ID'] = [f"VDJdb{id}" for id in range(len(df_out))]
         df_out = df_out[['TCR_ID', 'CDR3A', 'CDR3B', 'epitope', 'VA', 'VB', 'JA', 'JB', 'sp', 'MHCa', 'Score', 'Reference']]
-        vdjdb_file = os.path.join(self.save_dir, f'vdjdb_{species_filter[0]}.csv')
+        cdate = datetime.now()
+        
+        vdjdb_file = os.path.join(self.save_dir, '01_raw', f'vdjdb_{species_filter[0]}_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv')
         df_out.to_csv(vdjdb_file, index=False)
 
         return df_out

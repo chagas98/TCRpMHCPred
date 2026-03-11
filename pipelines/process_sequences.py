@@ -8,11 +8,11 @@ import datetime
 from Bio import SeqIO, AlignIO
 from Bio.Seq import Seq
 from anarci import number
-from pyMatchImm.preparation.Seqs import RunThimble, MHCSeqAssigner
-from pyMatchImm.preparation.indexer import ANARCIndexer
-from pyMatchImm.preparation.featurization import GetPositionsSeq
-from pyMatchImm.preparation.filtering import Filtering
-from pyMatchImm.datasets import VDJdbdataset, McPASTCRdataset, IEDBdataset, NeoTCRdataset, PosTRAITdataset, TESTdataset, ConcatDataset
+from modules.sequences.preparation.Seqs import RunThimble, MHCSeqAssigner
+from modules.sequences.preparation.indexer import ANARCIndexer
+from modules.sequences.preparation.featurization import GetPositionsSeq
+from modules.sequences.preparation.filtering import Filtering
+from modules.sequences.datasets import VDJdbdataset, McPASTCRdataset, IEDBdataset, NeoTCRdataset, PosTRAITdataset, TESTdataset, ConcatDataset
 from datetime import datetime
 
 _AHO_CDR_RANGES = {
@@ -49,27 +49,33 @@ def get_datasets(datasets_list: list, location: str, map_datasets: dict, descrip
     
     datasets = {}
     if 'vdjdb' in datasets_list:
-        vdjdb_file = f'{location}/{map_datasets["vdjdb"]}'
-        dataVDJ = VDJdbdataset(path=vdjdb_file, score_threshold=0, save_dir='datasets')
+        location_db = f'{location}/VDJdb'
+        vdjdb_file = f'{location_db}/00_vdjdb/{map_datasets["vdjdb"]}'
+        dataVDJ = VDJdbdataset(path=vdjdb_file, score_threshold=0, save_dir=location_db)
         datasets['vdjdb'] = dataVDJ
     if 'mcpas' in datasets_list:
-        mcpas_file = f'{location}/{map_datasets["mcpas"]}'
+        location_db = f'{location}/McPAS'
+        mcpas_file = f'{location_db}/{map_datasets["mcpas"]}'
         dataMcPAS = McPASTCRdataset(path=mcpas_file)
         datasets['mcpas'] = dataMcPAS
     if 'iedb' in datasets_list:
-        iedb_file = f'{location}/{map_datasets["iedb"]}'
+        location_db = f'{location}/IEDB'
+        iedb_file = f'{location_db}/{map_datasets["iedb"]}'
         dataIEDB = IEDBdataset(path=iedb_file)
         datasets['iedb'] = dataIEDB
     if 'neo' in datasets_list:
-        neo_file = f'{location}/{map_datasets["neo"]}'
+        location_db = f'{location}/Neo'
+        neo_file = f'{location_db}/{map_datasets["neo"]}'
         dataNeo = NeoTCRdataset(path=neo_file)
         datasets['neo'] = dataNeo
     if 'trait' in datasets_list:
-        trait_file = f'{location}/{map_datasets["trait"]}'
+        location_db = f'{location}/PosTrait'
+        trait_file = f'{location_db}/{map_datasets["trait"]}'
         dataTrait = PosTRAITdataset(path=trait_file)
         datasets['trait'] = dataTrait
     if 'test' in datasets_list:
-        test_file = f'{location}/test_{description}.csv'
+        location_db = f'{location}/Test'
+        test_file = f'{location_db}/{map_datasets["test"]}'
         dataTest = TESTdataset(path=test_file, map_cols=map_cols, outfile=f'test_{description}.csv')
         datasets['test'] = dataTest
 
@@ -82,10 +88,10 @@ def get_datasets(datasets_list: list, location: str, map_datasets: dict, descrip
     print(50*"-")
 
     cdate = datetime.now()
-    filename_path = f'datasets/combined_dataset_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv'
+    filename_path = f'{location_db}/02_processed/combined_dataset_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv'
     df.to_csv(filename_path, index=False)
 
-    return df, filename_path
+    return df, filename_path, location_db
 
 def _select_cdr_seq(variable_domain_seq, numbers, cdr_name):
     cdr_ranges = _AHO_CDR_RANGES.get(cdr_name)
@@ -145,7 +151,6 @@ def run_indexer(df):
         
             else:
                 print(f"Skipping row {i} due to missing TR{chain} sequence.")
-                #print(f'{row['TCR_ID']}: TR{chain} sequence is NaN')
                 continue
 
         # gather rows
@@ -187,7 +192,7 @@ def split_basedon_score(df):
         df_score = df[df['Score'] == score]
         
         cdate = datetime.now()
-        filename_path = f'datasets/fullSeqs_dataset_score{score}_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv'
+        filename_path = f'databases/fullSeqs_dataset_score{score}_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv'
         df_score.to_csv(filename_path, index=False)
 
         ids = df_score['TCR_ID'].tolist()
@@ -205,7 +210,7 @@ def split_basedon_score(df):
 
     return 
 
-def preparation(dataset_file, thimble_path, ref_mhc, aligned_mhc, description='train', retries_thimble=False):
+def preparation(dataset_file, thimble_path, ref_mhc, aligned_mhc, description='train', retries_thimble=False, location_db=None):
     """ Main function to run the preparation pipeline.
     This function orchestrates the entire process of preparing the dataset
     by running Thimble, MHC assignment, ANARCI indexing
@@ -249,29 +254,28 @@ def preparation(dataset_file, thimble_path, ref_mhc, aligned_mhc, description='t
     print(fullSeqs_indexed_df.columns)
 
     cdate = datetime.now()
-    fullSeqs_indexed_df.to_csv(f"datasets/fullSeqs_dataset_{description}_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv", index=False)
+    fullSeqs_indexed_df.to_csv(f"{location_db}/02_processed/fullSeqs_dataset_{description}_{cdate.year}{cdate.month:02d}{cdate.day:02d}.csv", index=False)
 
     # Split based on score
-    split_basedon_score(fullSeqs_indexed_df)
+    #split_basedon_score(fullSeqs_indexed_df)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run get_datasets script to load and concatenate TCR datasets.')
     parser.add_argument("-i", "--datasets_list", nargs='+', help="choose datasets to include", type=str)
-    parser.add_argument("-f", "--datasets_dir", help="location of public datasets", type=str, default='/home/samuel.assis/MatchImm/Public_Datasets')
+    parser.add_argument("-f", "--datasets_dir", help="location of public datasets", type=str, default='../databases')
     parser.add_argument("-m", "--map_datasets", help="map dataset file names", type=json.loads, 
-                        default='{"vdjdb": "vdjdb_human_monkey_mouse_TRA_TRB_paired_MHCI_score0_030625.tsv", \
+                        default='{"vdjdb": "vdjdb_human_monkey_mouse_TRA_TRB_paired_MHCI_score0_110326.tsv", \
                                 "mcpas": "McPAS_TCR_updatedSep2022_10062025.csv", \
                                 "iedb": "iedb_raw_linear_onlypositive_MHCI_TCRpaired.csv", \
                                 "neo": "NeoTCR data-20221220.xlsx", \
                                 "trait": "20250312-TRAIT_search_download.xlsx"}')
     parser.add_argument("-d", "--description", help="description of the dataset", type=str, default='train')
     parser.add_argument("-l", "--max_pep_length", help="Maximum peptide length for filtering", type=int, default=30)
-    parser.add_argument("-r", "--ref_mhc", help="Reference MHC sequences in FASTA format", type=str, default='/home/samuel.assis/MatchImm/Public_Datasets/mhc/hla_prot_includeMusMusculus.fasta')
-    parser.add_argument("-a", "--aligned_mhc", help="Aligned MHC sequences in FASTA format", type=str, default='/home/samuel.assis/MatchImm/Public_Datasets/mhc/A02010101_aligned_trimmed24_180_addGinit.fasta')
+    parser.add_argument("-r", "--ref_mhc", help="Reference MHC sequences in FASTA format", type=str, default='./assets/hla_prot_includeMusMusculus.fasta')
+    parser.add_argument("-a", "--aligned_mhc", help="Aligned MHC sequences in FASTA format", type=str, default='./assets/A02010101_aligned_trimmed24_180_addGinit.fasta')
     parser.add_argument("--thimble_path", help="Path to Thimble executable", type=str, default='thimble')
     parser.add_argument("--outdir", help="Output directory", type=str, default='output')
     args = parser.parse_args()
-
 
     print("-" * 50 +
         f"\nRunning get_datasets with parameters:\n"
@@ -285,12 +289,8 @@ if __name__ == "__main__":
         f"Reference MHC: {args.ref_mhc}\n"
         f"Output Directory: {args.outdir}\n" +
         "-" * 50)
-    
-    os.makedirs(args.outdir, exist_ok=True)
-    os.chdir(args.outdir)
-    os.makedirs('datasets', exist_ok=True)
-    
-    df, dataset_file = get_datasets(datasets_list = args.datasets_list,
+
+    df, dataset_file, location_db = get_datasets(datasets_list = args.datasets_list,
                                     location  = args.datasets_dir,
                                     map_datasets  = args.map_datasets,
                                     description   = args.description)
@@ -299,6 +299,7 @@ if __name__ == "__main__":
                 thimble_path = args.thimble_path,
                 ref_mhc      = args.ref_mhc,
                 aligned_mhc  = args.aligned_mhc,
-                description  = args.description)
+                description  = args.description,
+                location_db   = location_db)
 
 #python3 process_sequences.py -i vdjdb --outdir /home/samuel.assis/MatchImm/3_StructPred/predictions/VDJdb

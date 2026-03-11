@@ -85,6 +85,7 @@ class RunThimble:
         subprocess.call(f'{self.thimble_path} -in {thimble_input_path} -o {output_path} -s human', shell=True)
 
         outputs = pd.read_csv(output_path, sep='\t')
+        print(outputs.head())
         fixed = outputs[outputs[f'TR{chain}_aa'].notna()]
         output = dict(fixed[['TCR_name', f'TR{chain}_aa']].values)
         
