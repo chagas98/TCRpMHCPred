@@ -31,9 +31,9 @@ for i, row_old in df_old.iterrows():
         tcr_id_new = row_new['TCR_ID']
 
         if row_new['Score'] != row_old['Score']:
-            score_mismatches.append((tcr_id_old, tcr_id_new, row_old['Score'], row_new['Score']))
+            score_mismatches.append((tcr_id_old, tcr_id_new, row_old['Score'], row_new['Score'], row_old['Reference']))
             print(f"Score mismatch for TCR_ID {tcr_id_old}: old score {row_old['Score']} vs new score {row_new['Score']}")
 
 #save
-score_mismatches_df = pd.DataFrame(score_mismatches, columns=['TCR_ID_old', 'TCR_ID_new', 'Score_old', 'Score_new'])
+score_mismatches_df = pd.DataFrame(score_mismatches, columns=['TCR_ID_old', 'TCR_ID_new', 'Score_old', 'Score_new', 'Reference_old'])
 score_mismatches_df.to_csv("mismatches_score.csv", index=False)

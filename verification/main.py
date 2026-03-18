@@ -254,7 +254,7 @@ if __name__ == "__main__":
     
     ref_mhc_path = '/home/samuel.assis/MatchImm/Public_Datasets/mhc/A02010101_aligned_trimmed24_180_addGinit.fasta'
 
-    DS_train_score2 = pd.read_csv('/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score2_wojust10x_20260307.csv')
+    DS_train_score2 = pd.read_csv('/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score2_wojust10x_20251217.csv')
     TCR_struct_path_score2 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/TCR/TCR_raw'
     pMHC_struct_path_score2 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/pMHC/pMHC_renum'
     verifier = DataVerifier(DS_train_score2, DS_raw, pMHC_struct_path_score2, TCR_struct_path_score2, ref_mhc_path)
