@@ -1,2 +1,10 @@
+Running verification for score 2 dataset...
+Training dataset path: /home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score2_wojust10x_20260320.csv
+TCR structure path: /home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/TCR/TCR_raw
+pMHC structure path: /home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/pMHC/pMHC_renum
 All checks passed successfully.
+Running verification for score 3 dataset...
+Training dataset path: /home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score3_20251212.csv
+TCR structure path: /home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score_3/02_predictions/TCR/TCR_raw
+pMHC structure path: /home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score_3/02_predictions/pMHC/pMHC_renum
 All checks passed successfully.

@@ -254,15 +254,24 @@ if __name__ == "__main__":
     
     ref_mhc_path = '/home/samuel.assis/MatchImm/Public_Datasets/mhc/A02010101_aligned_trimmed24_180_addGinit.fasta'
 
-    DS_train_score2 = pd.read_csv('/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score2_wojust10x_20251217.csv')
+    DS_train_score2_path = '/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score2_wojust10x_20260320.csv'
+    DS_train_score2 = pd.read_csv(DS_train_score2_path)
     TCR_struct_path_score2 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/TCR/TCR_raw'
     pMHC_struct_path_score2 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score2_wojust10x/02_predictions/pMHC/pMHC_renum'
+    print("Running verification for score 2 dataset...")
+    print(f"Training dataset path: {DS_train_score2_path}")
+    print(f"TCR structure path: {TCR_struct_path_score2}")
+    print(f"pMHC structure path: {pMHC_struct_path_score2}")
     verifier = DataVerifier(DS_train_score2, DS_raw, pMHC_struct_path_score2, TCR_struct_path_score2, ref_mhc_path)
     verifier.run()
 
-
-    DS_train_score3 = pd.read_csv('/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score3_20251212.csv')
+    DS_train_score3_path = '/home/samuel.assis/MatchImm/MatchImmNet/data/01-raw/AF_vdjdb_score3_20251212.csv'
+    DS_train_score3 = pd.read_csv(DS_train_score3_path)
     TCR_struct_path_score3 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score_3/02_predictions/TCR/TCR_raw'
     pMHC_struct_path_score3 = '/home/samuel.assis/MatchImm/TCRpMHCPred/runs/vdjdb_score_3/02_predictions/pMHC/pMHC_renum'
+    print("Running verification for score 3 dataset...")
+    print(f"Training dataset path: {DS_train_score3_path}")
+    print(f"TCR structure path: {TCR_struct_path_score3}")
+    print(f"pMHC structure path: {pMHC_struct_path_score3}")
     verifier = DataVerifier(DS_train_score3, DS_raw, pMHC_struct_path_score3, TCR_struct_path_score3, ref_mhc_path)
     verifier.run()
