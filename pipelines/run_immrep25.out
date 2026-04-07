@@ -1,0 +1,15 @@
+nohup: ignoring input
+/home/samuel.assis/MatchImm/TCRpMHCPred/pipelines/modules/TCRpreparation.py:27: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  dataset['unique_tcr_id'] = [f'TCR{i:04d}' for i in range(len(dataset))]
+Preparing data...
+Original dataset size: 7402
+Number of TCR in raw samples: 7402
+Number of unique TCR samples: 1001
+Create fasta directory
+Number of samples without MHC sequence: 0
+Number of raw samples: 7402
+Number of unique samples: 15

@@ -695,7 +695,56 @@ class PosTRAITdataset(): #TODO: verify VA/VB/JA/JB alleles, verify F/W endings
     def __repr__(self):
         return f"PosTRAITdataset(num_samples={len(self.data)})"  
 
-#class NegTRAITdataset():
+class IMMREP25dataset():
+    def __init__(self, path, outfile, map_cols: dict, save_dir='.', transform=None):
+        self.path = path
+        self.transform = transform
+        self.save_dir = save_dir
+        self.outfile = outfile
+        self.map_cols = map_cols
+
+        # Load the dataset
+        self.data = pd.read_csv(self.path, dtype=str)
+        self.data = self.preprocess_test()
+
+    def preprocess_test(self):
+        """
+        Preprocess test data.
+        Returns:
+            pd.DataFrame: Processed DataFrame.
+        """
+        # Load the raw data
+        df = self.data.copy()
+        df.rename(columns=self.map_cols, inplace=True)
+        
+        # Ensure all required columns are present
+        required_cols = ['CDR3A', 'CDR3B', 'epitope', 'VA', 'VB', 'JA', 'JB', 'MHCa', 'class']
+        for col in required_cols:
+            if col not in df.columns:
+                raise ValueError(f"Missing required column: {col}")
+        
+        # Add HLA- prefix to all values in MHCa if not already present
+        df['MHCa'] = df['MHCa'].apply(lambda x: x if str(x).startswith('HLA-') else f'HLA-{x}')
+        df['TCR_ID'] = [f"TEST{id}" for id in range(len(df))]
+        df = df[['TCR_ID'] + required_cols]
+        df.to_csv(f'{self.save_dir}/{self.outfile}', index=False)
+        return df
+    
+    def to_df(self):
+        """
+        Convert the dataset to a pandas DataFrame.
+        """
+        return self.data
+    
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, idx):     
+        item = self.data.iloc[idx]
+        if self.transform:
+            item = self.transform(item)
+    def __repr__(self):
+        return f"TESTdataset(num_samples={len(self.data)})"
+
 class TESTdataset():
     def __init__(self, path, outfile, map_cols: dict, save_dir='.', transform=None):
         self.path = path
