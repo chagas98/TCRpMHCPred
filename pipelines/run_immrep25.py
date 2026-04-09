@@ -109,7 +109,7 @@ if __name__ == "__main__":
     input_path=f"{BASEPATH}/databases/immrep25/02_processed/fullSeqs_dataset_immrep25_20260406.csv"
     processed_path=f"{BASEPATH}/databases/immrep25/02_processed/fullSeqs_dataset_immrep25_20260406_processed.csv"
     direct_path = f"{BASEPATH}/databases/immrep25/02_processed/fullSeqs_dataset_immrep25_20260406_processed.csv"
-    date_to_gather = "20260406"
+    date_to_gather = "20260407"
     
     print("Preparing data...")
     resources = RunResources(name=name, 
